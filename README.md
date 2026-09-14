@@ -82,7 +82,26 @@
 <details>
 <summary><b>Codex</b></summary>
 
-Распакуйте [consilium.zip](https://github.com/Andrey-Batrimenko/claude-skills/releases/latest/download/consilium.zip) в `~/.agents/skills/` — для всех проектов — или в `.agents/skills/` внутри проекта. Codex подхватывает скиллы сам; если консилиум не появился, перезапустите Codex. Вызов вручную — `$consilium` или через `/skills`.
+**Способ 1 — плагином, с обновлениями.** Codex читает маркетплейсы в формате Claude, поэтому этот репозиторий подключается как есть:
+
+```
+codex plugin marketplace add Andrey-Batrimenko/claude-skills
+codex plugin add consilium@andrey-batrimenko
+```
+
+После установки начните новый чат, чтобы Codex подхватил скилл. Новые версии приходят при обновлении маркетплейса или перезапуске Codex.
+
+**Способ 2 — встроенным установщиком.** Напишите в чате Codex:
+
+```
+$skill-installer install https://github.com/Andrey-Batrimenko/claude-skills/tree/main/plugins/consilium/skills/consilium
+```
+
+Установщик скачает папку скилла в `~/.codex/skills/consilium`; затем перезапустите Codex. Сам скилл так не обновится: чтобы поставить новую версию, удалите эту папку и выполните команду ещё раз.
+
+**Способ 3 — из архива.** Распакуйте [consilium.zip](https://github.com/Andrey-Batrimenko/claude-skills/releases/latest/download/consilium.zip) в `~/.agents/skills/` — для всех проектов — или в `.agents/skills/` внутри проекта и перезапустите Codex.
+
+Вызвать вручную: наберите `$` и выберите консилиум из списка или откройте `/skills`.
 
 </details>
 
