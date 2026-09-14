@@ -1,0 +1,25 @@
+{
+  "name": "andrey-batrimenko",
+  "owner": {
+    "name": "Andrey Batrimenko"
+  },
+  "plugins": [
+    {
+      "name": "consilium",
+      "source": "./plugins/consilium",
+      "description": "Состязательный мультиагентный разбор: независимые агенты-специалисты, обязательный скептик, публичный разбор разногласий и реестр ограничений между тактами.",
+      "category": "productivity",
+      "keywords": [
+        "multi-agent",
+        "adversarial-review",
+        "skeptic",
+        "due-diligence",
+        "research",
+        "russian"
+      ]
+    }
+  ],
+  "metadata": {
+    "description": "Скиллы для Claude — для задач, где одного взгляда недостаточно."
+  }
+}

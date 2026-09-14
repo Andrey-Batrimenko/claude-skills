@@ -1,0 +1,78 @@
+name: Релиз скилла
+
+on:
+  push:
+    tags:
+      - '*-v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Тег существующего релиза, например consilium-v1.0.0 — пересобрать и перезалить файлы'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Разобрать тег
+        run: |
+          echo "SKILL=${TAG%-v*}" >> "$GITHUB_ENV"
+          echo "VERSION=${TAG##*-v}" >> "$GITHUB_ENV"
+
+      - name: Сверить версию с plugin.json
+        run: |
+          manifest="plugins/$SKILL/.claude-plugin/plugin.json"
+          test -f "$manifest" || { echo "Нет плагина $SKILL"; exit 1; }
+          actual="$(jq -r .version "$manifest")"
+          test "$actual" = "$VERSION" || { echo "В plugin.json версия $actual, а тег — $VERSION"; exit 1; }
+
+      # К каждому релизу прикладываются архивы ВСЕХ скиллов: тогда ссылки
+      # releases/latest/download/<скилл>.zip работают, какой бы скилл ни вышел последним.
+      - name: Собрать архивы всех скиллов
+        run: |
+          mkdir -p dist
+          for dir in plugins/*/; do
+            name="$(basename "$dir")"
+            test -f "plugins/$name/skills/$name/SKILL.md" || continue
+            ( cd "plugins/$name/skills" && zip -rqX "$GITHUB_WORKSPACE/dist/$name.skill" "$name" -x '*.DS_Store' )
+            cp "dist/$name.skill" "dist/$name.zip"
+          done
+          ls -l dist
+
+      - name: Заметки из CHANGELOG
+        run: |
+          awk -v v="$VERSION" '$1 == "##" && $2 == v {f=1; next} /^## / && f {exit} f' "plugins/$SKILL/CHANGELOG.md" > notes.md
+          test -s notes.md || { echo "В CHANGELOG нет раздела $VERSION"; exit 1; }
+          market="$(jq -r .name .claude-plugin/marketplace.json)"
+          {
+            echo
+            echo "## Установка"
+            echo
+            echo "**Claude Code:** \`/plugin marketplace add $GITHUB_REPOSITORY\`, затем \`/plugin install $SKILL@$market\`."
+            echo
+            echo "**claude.ai и Claude Desktop:** \`$SKILL.skill\` ниже."
+            echo
+            echo "**ChatGPT, Codex, Cursor, Gemini CLI, GitHub Copilot и другие агенты:** \`$SKILL.zip\` ниже."
+            echo
+            echo "Пошаговые инструкции для каждого инструмента — в [README](https://github.com/$GITHUB_REPOSITORY#%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0)."
+          } >> notes.md
+
+      - name: Опубликовать релиз
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+            gh release edit "$TAG" --notes-file notes.md
+          else
+            gh release create "$TAG" dist/* --title "$SKILL $VERSION" --notes-file notes.md
+          fi

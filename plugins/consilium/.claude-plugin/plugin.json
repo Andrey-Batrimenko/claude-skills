@@ -1,0 +1,12 @@
+{
+  "name": "consilium",
+  "version": "1.0.0",
+  "description": "Состязательный мультиагентный разбор материалов с высокой ценой ошибки: независимые агенты-специалисты по общему нумерованному досье, обязательный скептик, публичный разбор разногласий, реестр ограничений между тактами.",
+  "author": {
+    "name": "Andrey Batrimenko"
+  },
+  "homepage": "https://github.com/Andrey-Batrimenko/claude-skills/tree/main/plugins/consilium",
+  "repository": "https://github.com/Andrey-Batrimenko/claude-skills",
+  "license": "MIT",
+  "keywords": ["multi-agent", "adversarial-review", "skeptic", "due-diligence", "research", "russian"]
+}
